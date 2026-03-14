@@ -156,10 +156,10 @@ For the full language specification see [`docs/language-reference.md`](docs/lang
 ## Compiler Pipeline
 
 ```
-.ba file → Lexer → Tokens → Parser → AST → Codegen → .c file
+.ba file → Lexer → Tokens → Parser → AST → Semantic Analysis → Codegen → .c file
 ```
 
-Written in Go. All four stages are complete.
+Written in Go. All stages are complete.
 
 ---
 
@@ -267,6 +267,7 @@ The compiler enforces these properties on every generated file:
 - **Safety before control** — safety checks always run first; if violated, failsafe is called and the function returns
 - **Symmetric failsafe** — failsafe and boot always perform the same state initialization
 - **No fallthrough** — safety violations emit `return` after calling failsafe, preventing control logic from overriding a fault state
+- **Undefined identifier rejection** — the semantic analyzer catches references to undeclared variables, constants, and state names before any C is emitted
 
 These are not conventions. They are structural properties of the compiler output.
 
@@ -285,6 +286,8 @@ Baptisia/
     nodes.go                # AST node definitions
   parser/
     parser.go               # Parser
+  semantic/
+    analyzer.go             # Semantic analysis — block validation, undefined identifier checks
   codegen/
     codegen.go              # C code generator
   hal/
@@ -301,7 +304,6 @@ Baptisia/
     language-reference.md   # Full language specification
   test files/
     motor.ba                # Motor controller (PLC target)
-    comments.ba             # Comments and constants test
     OR_logic.ba             # Pump controller with OR safety and enum states
 ```
 

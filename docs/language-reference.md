@@ -1,6 +1,6 @@
 # Baptisia Language Reference
 
-Version 0.1 — covers all features currently implemented in the compiler.
+Version 0.2 — covers all features currently implemented in the compiler.
 
 ---
 
@@ -30,7 +30,7 @@ This order is not configurable. The compiler will not generate code that deviate
 A `.ba` file contains exactly one `device` block. The device block contains named sub-blocks that define each aspect of the device's behavior. Blocks can appear in any order inside the device — the compiler enforces execution order, not source order.
 
 ```baptisia
-device <name> : <target> {
+device <n> : <target> {
     watchdog: <time>
     cycle: <time>
 
@@ -258,6 +258,7 @@ When a safety condition is triggered, the compiler emits a failsafe call followe
 ```c
 if (speed >= MAX_SPEED) {
     motor_failsafe();
+    return;
 }
 ```
 
@@ -284,9 +285,13 @@ Either condition triggering calls the failsafe. Emits `||` in C. Used when multi
 | Operator | Description |
 |---|---|
 | `>=` | Greater than or equal |
+| `>` | Greater than |
+| `<=` | Less than or equal |
 | `<` | Less than |
+| `==` | Equal |
+| `!=` | Not equal |
 
-Additional operators (`>`, `<=`, `!=`, `==`) are planned.
+All six operators are supported in safety, control, and compound conditions.
 
 ---
 
@@ -343,6 +348,20 @@ else : <assignment>
 ```
 
 Either condition being true executes the `then` branch. Emits `||` in C. The `else` branch is optional.
+
+---
+
+## Semantic Analysis
+
+The compiler performs semantic validation after parsing and before code generation. If any semantic error is found, no C output is produced.
+
+Checks currently enforced:
+
+- All mandatory blocks are present (`boot`, `inputs`, `outputs`, `safety`, `failsafe`, `control`)
+- Every identifier referenced in `boot`, `safety`, and `control` is declared in `vars`, `consts`, `states`, or `outputs`
+- Built-in literals (`true`, `false`, `on`, `off`) are always valid
+
+A device that references an undeclared name will be rejected with a clear error message identifying the block and the unknown identifier.
 
 ---
 
@@ -458,5 +477,6 @@ Without `-sim`, the compiler emits a complete standalone C program including `ma
 - Single-line comments only
 - No error recovery — parser prints error and continues, which can produce unexpected output
 - Line numbers in error messages are present in the lexer but not yet propagated to all error sites
+- No type checking — comparing an `f32` variable against an integer constant is not yet flagged
 
 These are known limitations planned for future versions.
