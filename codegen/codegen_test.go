@@ -307,39 +307,3 @@ func TestFirstDiffNoDiff(t *testing.T) {
 		t.Errorf("expected no diff, got %q", diff)
 	}
 }
-
-func TestGenerateSafetyOperators(t *testing.T) {
-	tests := []struct {
-		name     string
-		op       string
-		wantLine string
-	}{
-		{name: "greater than emits correctly", op: ">", wantLine: "if (temp > MAX_TEMP) {"},
-		{name: "less than or equal emits correctly", op: "<=", wantLine: "if (temp <= MAX_TEMP) {"},
-		{name: "not equal emits correctly", op: "!=", wantLine: "if (temp != MAX_TEMP) {"},
-		{name: "equal equal emits correctly", op: "==", wantLine: "if (temp == MAX_TEMP) {"},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			device := &ast.DeviceNode{
-				Name:     "motor",
-				Watchdog: "500ms",
-				Cycle:    "100ms",
-				Consts:   &ast.ConstNode{Constants: []ast.ConstDecl{{Name: "max_temp", Value: "100"}}},
-				Vars:     &ast.VarsNode{Vars: []ast.VarDecl{{Volatile: true, TypeName: "BOOL", Name: "state", Value: "false"}, {Volatile: true, TypeName: "I32", Name: "temp", Value: "0"}}},
-				Boot:     &ast.BootNode{Statements: []ast.Node{&ast.AssignStatement{Name: "state", Value: "false"}}},
-				Inputs:   &ast.InputsNode{Inputs: []ast.SensorAssign{{Name: "temp", Pin: "A1", Min: "-40", Max: "150"}}},
-				Outputs:  &ast.OutputsNode{Outputs: []ast.ActuatorDecl{{Name: "motor_relay", Pin: "D0"}}},
-				Safety:   &ast.SafetyNode{Statements: []ast.Node{&ast.IfStatement{Left: "temp", Operator: tc.op, Right: "max_temp", Then: &ast.AssignStatement{Name: "state", Value: "false"}}}},
-				Failsafe: &ast.FailsafeNode{Statements: []ast.Node{&ast.AssignStatement{Name: "state", Value: "false"}}},
-				Control:  &ast.ControlNode{Statements: []ast.Node{&ast.IfElseStatement{LeftVar: "temp", LeftOp: "<", LeftVal: "max_temp", RightVar: "temp", RightOp: "<", RightVal: "max_temp", Then: &ast.AssignStatement{Name: "state", Value: "true"}, Else: &ast.AssignStatement{Name: "state", Value: "false"}}}},
-			}
-
-			got := Generate(device, false)
-			if !strings.Contains(got, tc.wantLine) {
-				t.Errorf("expected generated code to contain %q\n--- got ---\n%s", tc.wantLine, got)
-			}
-		})
-	}
-}

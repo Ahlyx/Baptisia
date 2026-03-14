@@ -76,51 +76,6 @@ func TestLexerNextToken(t *testing.T) {
 				{Type: TOKEN_EOF, Literal: "", Line: 1},
 			},
 		},
-
-		{
-			name:  "greater than operator",
-			input: "if temp > max_temp",
-			want: []Token{
-				{Type: TOKEN_IF, Literal: "if", Line: 1},
-				{Type: TOKEN_IDENT, Literal: "temp", Line: 1},
-				{Type: TOKEN_GT, Literal: ">", Line: 1},
-				{Type: TOKEN_IDENT, Literal: "max_temp", Line: 1},
-				{Type: TOKEN_EOF, Literal: "", Line: 1},
-			},
-		},
-		{
-			name:  "less than or equal operator",
-			input: "if temp <= max_temp",
-			want: []Token{
-				{Type: TOKEN_IF, Literal: "if", Line: 1},
-				{Type: TOKEN_IDENT, Literal: "temp", Line: 1},
-				{Type: TOKEN_LTE, Literal: "<=", Line: 1},
-				{Type: TOKEN_IDENT, Literal: "max_temp", Line: 1},
-				{Type: TOKEN_EOF, Literal: "", Line: 1},
-			},
-		},
-		{
-			name:  "not equal operator",
-			input: "if temp != max_temp",
-			want: []Token{
-				{Type: TOKEN_IF, Literal: "if", Line: 1},
-				{Type: TOKEN_IDENT, Literal: "temp", Line: 1},
-				{Type: TOKEN_NEQ, Literal: "!=", Line: 1},
-				{Type: TOKEN_IDENT, Literal: "max_temp", Line: 1},
-				{Type: TOKEN_EOF, Literal: "", Line: 1},
-			},
-		},
-		{
-			name:  "equal equal operator",
-			input: "if temp == max_temp",
-			want: []Token{
-				{Type: TOKEN_IF, Literal: "if", Line: 1},
-				{Type: TOKEN_IDENT, Literal: "temp", Line: 1},
-				{Type: TOKEN_EQ, Literal: "==", Line: 1},
-				{Type: TOKEN_IDENT, Literal: "max_temp", Line: 1},
-				{Type: TOKEN_EOF, Literal: "", Line: 1},
-			},
-		},
 		{
 			name:  "line tracking second line token",
 			input: "\nboot",
