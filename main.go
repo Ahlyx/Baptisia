@@ -5,6 +5,7 @@ import (
 	"baptisia/codegen"
 	"baptisia/lexer"
 	"baptisia/parser"
+	"baptisia/semantic"
 	"flag"
 	"fmt"
 	"os"
@@ -39,6 +40,16 @@ func main() {
 			fmt.Printf("  error: %s\n", e)
 		}
 		fmt.Printf("\n%d error(s) found. No output generated.\n", len(p.Errors))
+		os.Exit(1)
+	}
+
+	semanticErrors := semantic.Check(program.Device)
+	if len(semanticErrors) > 0 {
+		fmt.Printf("Baptisia compiler errors in %s:\n\n", args[0])
+		for _, e := range semanticErrors {
+			fmt.Printf("  error: %s\n", e)
+		}
+		fmt.Printf("\n%d error(s) found. No output generated.\n", len(semanticErrors))
 		os.Exit(1)
 	}
 
