@@ -165,7 +165,11 @@ func generateStatement(node ast.Node, indent string, deviceName string) string {
 		fmt.Fprintf(&out, "%swrite_actuator_%s(%s);\n", indent, stmt.Relay, state)
 
 	case *ast.IfStatement:
-		fmt.Fprintf(&out, "%sif (%s %s %s) {\n", indent, stmt.Left, stmt.Operator, strings.ToUpper(stmt.Right))
+		right := stmt.Right
+		if right != "true" && right != "false" {
+			right = strings.ToUpper(right)
+		}
+		fmt.Fprintf(&out, "%sif (%s %s %s) {\n", indent, stmt.Left, stmt.Operator, right)
 		fmt.Fprintf(&out, "%s    %s_failsafe();\n", indent, deviceName)
 		fmt.Fprintf(&out, "%s    return;\n", indent)
 		fmt.Fprintf(&out, "%s}\n", indent)
