@@ -1,0 +1,51 @@
+device pump : SCADA{
+    watchdog: 500ms
+    cycle: 100ms
+
+    const{
+        max_psi = 100
+        max_flow = 500
+    }
+
+    states{
+        IDLE
+        RUNNING
+        FAULT
+        MAINTENANCE
+        
+    }
+
+    vars{
+        vol i32 psi = 0
+        vol i32 flow = 0
+    }
+
+    boot{
+        state = IDLE
+        output(motor_relay, off)
+    }
+
+    inputs{
+        psi = val(sensor(A0), min: 0, max: 500)
+        flow = val(sensor(A1), min: 0, max: 500)
+    }
+
+    outputs{
+        motor_relay = actuator(D0)
+    }
+
+    safety{
+        if psi >= max_psi OR flow >= max_flow : state = FAULT
+
+    }
+
+    failsafe{
+        state = FAULT
+        output(motor_relay, off)
+    }
+
+    control{
+        if psi < max_psi AND flow < max_flow : state = RUNNING
+	    else : state = IDLE
+    }
+}}

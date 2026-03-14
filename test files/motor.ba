@@ -1,0 +1,45 @@
+device motor : PLC {
+	watchdog: 500ms
+	cycle: 100ms
+
+	const{
+		max_speed = 500
+		max_temp = 100
+	}
+	
+	vars{
+	vol b state = false
+	vol i32 speed = 0
+	vol f32 temp = 0.0
+	}
+	
+	boot{ 
+	state = false
+	output(motor_relay, off)
+	}
+	
+	inputs{
+	speed = val(sensor(A0), min: 0, max: 1000)
+	temp = val(sensor(A1), min: -40, max: 150)
+	}
+	
+	outputs{
+	motor_relay = actuator(D0)
+	}
+	
+	safety{
+	if speed >= max_speed : state = false
+	if temp >= max_temp : state = false
+	}
+
+	failsafe{
+	state = false
+	output(motor_relay, off)
+	}
+
+	control{
+	if speed < max_speed AND temp < max_temp : state = true
+	else : state = false
+	}
+	
+}

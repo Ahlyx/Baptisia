@@ -1,0 +1,12 @@
+﻿# Compiled binaries
+hal/pump_sim
+hal/pump_control
+*.o
+
+# Generated C output from compiler
+hal/OR_logic.c
+hal/motor.c
+hal/comments.c
+OR_logic.c
+motor.c
+comments.c

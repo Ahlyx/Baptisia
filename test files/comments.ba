@@ -1,0 +1,28 @@
+// this is a comment
+
+device sensor : SCADA{
+    watchdog: 500ms
+    cycle: 100ms
+
+    const{
+        max_speed = 500
+        max_temp = 100
+    }
+
+    vars{
+        vol i32 speed = 0
+        vol f32 temp = 0.0
+        vol b state = false
+    }
+
+    safety{
+        // shut down if speed exceeds safe limit
+        if speed >= max_speed : state = false
+        // shut down if temp exceeds safe limit
+        if temp >= max_temp : state = false
+    }
+
+
+
+
+}
