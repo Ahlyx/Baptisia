@@ -167,6 +167,7 @@ func generateStatement(node ast.Node, indent string, deviceName string) string {
 	case *ast.IfStatement:
 		fmt.Fprintf(&out, "%sif (%s %s %s) {\n", indent, stmt.Left, stmt.Operator, strings.ToUpper(stmt.Right))
 		fmt.Fprintf(&out, "%s    %s_failsafe();\n", indent, deviceName)
+		fmt.Fprintf(&out, "%s    return;\n", indent)
 		fmt.Fprintf(&out, "%s}\n", indent)
 
 	case *ast.IfElseStatement:
