@@ -165,16 +165,28 @@ func generateStatement(node ast.Node, indent string, deviceName string) string {
 		fmt.Fprintf(&out, "%swrite_actuator_%s(%s);\n", indent, stmt.Relay, state)
 
 	case *ast.IfStatement:
-		fmt.Fprintf(&out, "%sif (%s %s %s) {\n", indent, stmt.Left, stmt.Operator, strings.ToUpper(stmt.Right))
+		right := stmt.Right
+		if right != "true" && right != "false" {
+			right = strings.ToUpper(right)
+		}
+		fmt.Fprintf(&out, "%sif (%s %s %s) {\n", indent, stmt.Left, stmt.Operator, right)
 		fmt.Fprintf(&out, "%s    %s_failsafe();\n", indent, deviceName)
 		fmt.Fprintf(&out, "%s    return;\n", indent)
 		fmt.Fprintf(&out, "%s}\n", indent)
 
 	case *ast.IfElseStatement:
+		leftVal := stmt.LeftVal
+		if leftVal != "true" && leftVal != "false" {
+			leftVal = strings.ToUpper(leftVal)
+		}
+		rightVal := stmt.RightVal
+		if rightVal != "true" && rightVal != "false" {
+			rightVal = strings.ToUpper(rightVal)
+		}
 		fmt.Fprintf(&out, "%sif (%s %s %s && %s %s %s) {\n",
 			indent,
-			stmt.LeftVar, stmt.LeftOp, strings.ToUpper(stmt.LeftVal),
-			stmt.RightVar, stmt.RightOp, strings.ToUpper(stmt.RightVal))
+			stmt.LeftVar, stmt.LeftOp, leftVal,
+			stmt.RightVar, stmt.RightOp, rightVal)
 		out.WriteString(generateStatement(stmt.Then, indent+"    ", deviceName))
 		fmt.Fprintf(&out, "%s} else {\n", indent)
 		out.WriteString(generateStatement(stmt.Else, indent+"    ", deviceName))
@@ -190,10 +202,18 @@ func generateStatement(node ast.Node, indent string, deviceName string) string {
 		fmt.Fprintf(&out, "%s}\n", indent)
 
 	case *ast.IfOrElseStatement:
+		leftVal := stmt.LeftVal
+		if leftVal != "true" && leftVal != "false" {
+			leftVal = strings.ToUpper(leftVal)
+		}
+		rightVal := stmt.RightVal
+		if rightVal != "true" && rightVal != "false" {
+			rightVal = strings.ToUpper(rightVal)
+		}
 		fmt.Fprintf(&out, "%sif (%s %s %s || %s %s %s) {\n",
 			indent,
-			stmt.LeftVar, stmt.LeftOp, strings.ToUpper(stmt.LeftVal),
-			stmt.RightVar, stmt.RightOp, strings.ToUpper(stmt.RightVal))
+			stmt.LeftVar, stmt.LeftOp, leftVal,
+			stmt.RightVar, stmt.RightOp, rightVal)
 		out.WriteString(generateStatement(stmt.Then, indent+"    ", deviceName))
 		fmt.Fprintf(&out, "%s} else {\n", indent)
 		out.WriteString(generateStatement(stmt.Else, indent+"    ", deviceName))
