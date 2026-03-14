@@ -48,4 +48,4 @@ device pump : SCADA{
         if psi < max_psi AND flow < max_flow : state = RUNNING
 	    else : state = IDLE
     }
-}}
+}
