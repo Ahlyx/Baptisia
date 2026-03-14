@@ -48,7 +48,7 @@ func main() {
 	cCode := codegen.Generate(program.Device, !*simMode)
 	fmt.Println(cCode)
 
-	base := filepath.Base(args[0])
+	base := filepath.Clean(filepath.Base(args[0]))
 	outputName := "hal/" + strings.TrimSuffix(base, filepath.Ext(base)) + ".c"
 
 	err = os.WriteFile(outputName, []byte(cCode), 0644)
@@ -92,12 +92,18 @@ func printAST(device *ast.DeviceNode) {
 		for _, s := range device.Safety.Statements {
 			switch stmt := s.(type) {
 			case *ast.IfStatement:
-				then := stmt.Then.(*ast.AssignStatement)
+				then, ok := stmt.Then.(*ast.AssignStatement)
+				if !ok {
+					continue
+				}
 				fmt.Printf("    if %s %s %s : %s = %s\n",
 					stmt.Left, stmt.Operator, stmt.Right,
 					then.Name, then.Value)
 			case *ast.IfOrStatement:
-				then := stmt.Then.(*ast.AssignStatement)
+				then, ok := stmt.Then.(*ast.AssignStatement)
+				if !ok {
+					continue
+				}
 				fmt.Printf("    if %s %s %s OR %s %s %s : %s = %s\n",
 					stmt.LeftVar, stmt.LeftOp, stmt.LeftVal,
 					stmt.RightVar, stmt.RightOp, stmt.RightVal,
@@ -123,8 +129,14 @@ func printAST(device *ast.DeviceNode) {
 		for _, s := range device.Control.Statements {
 			switch stmt := s.(type) {
 			case *ast.IfElseStatement:
-				then := stmt.Then.(*ast.AssignStatement)
-				els := stmt.Else.(*ast.AssignStatement)
+				then, ok := stmt.Then.(*ast.AssignStatement)
+				if !ok {
+					continue
+				}
+				els, ok := stmt.Else.(*ast.AssignStatement)
+				if !ok {
+					continue
+				}
 				fmt.Printf("    if %s %s %s AND %s %s %s : %s = %s else : %s = %s\n",
 					stmt.LeftVar, stmt.LeftOp, stmt.LeftVal,
 					stmt.RightVar, stmt.RightOp, stmt.RightVal,
