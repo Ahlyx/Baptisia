@@ -160,7 +160,9 @@ func (p *Parser) parseBoot() *ast.BootNode {
 	p.expect(lexer.TOKEN_LBRACE)
 
 	for p.current.Type != lexer.TOKEN_RBRACE && p.current.Type != lexer.TOKEN_EOF {
-		node.Statements = append(node.Statements, p.parseStatement())
+		if stmt := p.parseStatement(); stmt != nil {
+			node.Statements = append(node.Statements, stmt)
+		}
 	}
 
 	p.expect(lexer.TOKEN_RBRACE)
@@ -232,7 +234,9 @@ func (p *Parser) parseSafety() *ast.SafetyNode {
 	p.expect(lexer.TOKEN_LBRACE)
 
 	for p.current.Type != lexer.TOKEN_RBRACE && p.current.Type != lexer.TOKEN_EOF {
-		node.Statements = append(node.Statements, p.parseStatement())
+		if stmt := p.parseStatement(); stmt != nil {
+			node.Statements = append(node.Statements, stmt)
+		}
 	}
 
 	p.expect(lexer.TOKEN_RBRACE)
@@ -245,7 +249,9 @@ func (p *Parser) parseFailsafe() *ast.FailsafeNode {
 	p.expect(lexer.TOKEN_LBRACE)
 
 	for p.current.Type != lexer.TOKEN_RBRACE && p.current.Type != lexer.TOKEN_EOF {
-		node.Statements = append(node.Statements, p.parseStatement())
+		if stmt := p.parseStatement(); stmt != nil {
+			node.Statements = append(node.Statements, stmt)
+		}
 	}
 
 	p.expect(lexer.TOKEN_RBRACE)
@@ -258,7 +264,9 @@ func (p *Parser) parseControl() *ast.ControlNode {
 	p.expect(lexer.TOKEN_LBRACE)
 
 	for p.current.Type != lexer.TOKEN_RBRACE && p.current.Type != lexer.TOKEN_EOF {
-		node.Statements = append(node.Statements, p.parseStatement())
+		if stmt := p.parseStatement(); stmt != nil {
+			node.Statements = append(node.Statements, stmt)
+		}
 	}
 
 	p.expect(lexer.TOKEN_RBRACE)

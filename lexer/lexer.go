@@ -82,6 +82,7 @@ func (l *Lexer) skipComment() {
 	for l.pos < len(l.input) && l.input[l.pos] != '\n' {
 		l.pos++
 	}
+	// Do not consume '\n' here; skipWhitespace() increments l.line.
 }
 
 func (l *Lexer) skipWhitespace() {
@@ -143,39 +144,40 @@ func (l *Lexer) readNumber() Token {
 }
 
 func (l *Lexer) lookupKeyword(word string) TokenType {
-	keywords := map[string]TokenType{
-		"device":   TOKEN_DEVICE,
-		"vars":     TOKEN_VARS,
-		"boot":     TOKEN_BOOT,
-		"inputs":   TOKEN_INPUTS,
-		"outputs":  TOKEN_OUTPUTS,
-		"safety":   TOKEN_SAFETY,
-		"failsafe": TOKEN_FAILSAFE,
-		"control":  TOKEN_CONTROL,
-		"vol":      TOKEN_VOL,
-		"watchdog": TOKEN_WATCHDOG,
-		"cycle":    TOKEN_CYCLE,
-		"b":        TOKEN_BOOL,
-		"i32":      TOKEN_I32,
-		"f32":      TOKEN_F32,
-		"if":       TOKEN_IF,
-		"else":     TOKEN_ELSE,
-		"AND":      TOKEN_AND,
-		"OR":       TOKEN_OR,
-		"sensor":   TOKEN_SENSOR,
-		"actuator": TOKEN_ACTUATOR,
-		"val":      TOKEN_VAL,
-		"output":   TOKEN_OUTPUT,
-		"true":     TOKEN_TRUE,
-		"false":    TOKEN_FALSE,
-		"off":      TOKEN_OFF,
-		"const":    TOKEN_CONST,
-		"states":   TOKEN_STATES,
-	}
 	if t, ok := keywords[word]; ok {
 		return t
 	}
 	return TOKEN_IDENT
+}
+
+var keywords = map[string]TokenType{
+	"device":   TOKEN_DEVICE,
+	"vars":     TOKEN_VARS,
+	"boot":     TOKEN_BOOT,
+	"inputs":   TOKEN_INPUTS,
+	"outputs":  TOKEN_OUTPUTS,
+	"safety":   TOKEN_SAFETY,
+	"failsafe": TOKEN_FAILSAFE,
+	"control":  TOKEN_CONTROL,
+	"vol":      TOKEN_VOL,
+	"watchdog": TOKEN_WATCHDOG,
+	"cycle":    TOKEN_CYCLE,
+	"b":        TOKEN_BOOL,
+	"i32":      TOKEN_I32,
+	"f32":      TOKEN_F32,
+	"if":       TOKEN_IF,
+	"else":     TOKEN_ELSE,
+	"AND":      TOKEN_AND,
+	"OR":       TOKEN_OR,
+	"sensor":   TOKEN_SENSOR,
+	"actuator": TOKEN_ACTUATOR,
+	"val":      TOKEN_VAL,
+	"output":   TOKEN_OUTPUT,
+	"true":     TOKEN_TRUE,
+	"false":    TOKEN_FALSE,
+	"off":      TOKEN_OFF,
+	"const":    TOKEN_CONST,
+	"states":   TOKEN_STATES,
 }
 
 func (l *Lexer) isLetter(ch byte) bool {
