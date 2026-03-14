@@ -82,6 +82,7 @@ func (l *Lexer) skipComment() {
 	for l.pos < len(l.input) && l.input[l.pos] != '\n' {
 		l.pos++
 	}
+	// Do not consume '\n' here; skipWhitespace() increments l.line.
 }
 
 func (l *Lexer) skipWhitespace() {
