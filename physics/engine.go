@@ -75,16 +75,16 @@ func (e *Engine) PrintCycleHeader() {
 
 // PrintSummary prints a summary at the end of the simulation
 func (e *Engine) PrintSummary() {
-    fmt.Printf("\n=== Simulation Complete ===\n")
-    fmt.Printf("Total cycles: %d\n", e.Cycles)
-    fmt.Printf("Final state:  %s\n", e.Pump.Status())
-    if e.Pump.Latched {
-        fmt.Printf("Fault latched: YES — manual reset required\n")
-    }
-    psi, flow, temp := e.Pump.Readings()
-    fmt.Printf("Final PSI:    %d\n", psi)
-    fmt.Printf("Final flow:   %d\n", flow)
-    fmt.Printf("Final temp:   %d°C\n", temp)
+	fmt.Printf("\n=== Simulation Complete ===\n")
+	fmt.Printf("Total cycles: %d\n", e.Cycles)
+	fmt.Printf("Final state:  %s\n", e.Pump.Status())
+	if e.Pump.Latched {
+		fmt.Printf("Fault latched: YES — manual reset required\n")
+	}
+	psi, flow, temp := e.Pump.Readings()
+	fmt.Printf("Final PSI:    %d\n", psi)
+	fmt.Printf("Final flow:   %d\n", flow)
+	fmt.Printf("Final temp:   %d°C\n", temp)
 }
 
 // RunStandalone runs the simulation entirely in Go without the C HAL
@@ -162,13 +162,16 @@ func (e *Engine) RunWithCBinary(binaryPath string, sensorFile string, actuatorFi
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
 			fmt.Println("Control loop error:", err)
+			return
 		}
 
 		// read what the C loop decided
 		state, err := e.ReadActuatorState(actuatorFile)
-		if err == nil {
-			e.Pump.SetState(state)
+		if err != nil {
+			fmt.Println("Error reading actuator state:", err)
+			return
 		}
+		e.Pump.SetState(state)
 
 		e.PrintCycleHeader()
 		e.Step()

@@ -5,6 +5,7 @@ import (
 	"baptisia/codegen"
 	"baptisia/lexer"
 	"baptisia/parser"
+	"baptisia/semantic"
 	"flag"
 	"fmt"
 	"os"
@@ -42,13 +43,23 @@ func main() {
 		os.Exit(1)
 	}
 
+	semanticErrors := semantic.Check(program.Device)
+	if len(semanticErrors) > 0 {
+		fmt.Printf("Baptisia compiler errors in %s:\n\n", args[0])
+		for _, e := range semanticErrors {
+			fmt.Printf("  error: %s\n", e)
+		}
+		fmt.Printf("\n%d error(s) found. No output generated.\n", len(semanticErrors))
+		os.Exit(1)
+	}
+
 	printAST(program.Device)
 
 	fmt.Println("\n--- Generated C ---")
 	cCode := codegen.Generate(program.Device, !*simMode)
 	fmt.Println(cCode)
 
-	base := filepath.Base(args[0])
+	base := filepath.Clean(filepath.Base(args[0]))
 	outputName := "hal/" + strings.TrimSuffix(base, filepath.Ext(base)) + ".c"
 
 	err = os.WriteFile(outputName, []byte(cCode), 0644)
@@ -92,12 +103,18 @@ func printAST(device *ast.DeviceNode) {
 		for _, s := range device.Safety.Statements {
 			switch stmt := s.(type) {
 			case *ast.IfStatement:
-				then := stmt.Then.(*ast.AssignStatement)
+				then, ok := stmt.Then.(*ast.AssignStatement)
+				if !ok {
+					continue
+				}
 				fmt.Printf("    if %s %s %s : %s = %s\n",
 					stmt.Left, stmt.Operator, stmt.Right,
 					then.Name, then.Value)
 			case *ast.IfOrStatement:
-				then := stmt.Then.(*ast.AssignStatement)
+				then, ok := stmt.Then.(*ast.AssignStatement)
+				if !ok {
+					continue
+				}
 				fmt.Printf("    if %s %s %s OR %s %s %s : %s = %s\n",
 					stmt.LeftVar, stmt.LeftOp, stmt.LeftVal,
 					stmt.RightVar, stmt.RightOp, stmt.RightVal,
@@ -123,8 +140,14 @@ func printAST(device *ast.DeviceNode) {
 		for _, s := range device.Control.Statements {
 			switch stmt := s.(type) {
 			case *ast.IfElseStatement:
-				then := stmt.Then.(*ast.AssignStatement)
-				els := stmt.Else.(*ast.AssignStatement)
+				then, ok := stmt.Then.(*ast.AssignStatement)
+				if !ok {
+					continue
+				}
+				els, ok := stmt.Else.(*ast.AssignStatement)
+				if !ok {
+					continue
+				}
 				fmt.Printf("    if %s %s %s AND %s %s %s : %s = %s else : %s = %s\n",
 					stmt.LeftVar, stmt.LeftOp, stmt.LeftVal,
 					stmt.RightVar, stmt.RightOp, stmt.RightVal,
