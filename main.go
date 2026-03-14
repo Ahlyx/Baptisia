@@ -48,7 +48,7 @@ func main() {
 	cCode := codegen.Generate(program.Device, !*simMode)
 	fmt.Println(cCode)
 
-	base := filepath.Base(args[0])
+	base := filepath.Clean(filepath.Base(args[0]))
 	outputName := "hal/" + strings.TrimSuffix(base, filepath.Ext(base)) + ".c"
 
 	err = os.WriteFile(outputName, []byte(cCode), 0644)
