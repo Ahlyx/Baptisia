@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 )
 
-const (
-	sensorFile   = "/tmp/baptisia_sensors.txt"
-	actuatorFile = "/tmp/baptisia_actuator.txt"
-	controlBin   = "/home/ahlyx/Baptisia/hal/pump_control"
+var (
+	sensorFile   = filepath.Join(os.TempDir(), "baptisia_sensors.txt")
+	actuatorFile = filepath.Join(os.TempDir(), "baptisia_actuator.txt")
+	controlBin   = filepath.Join(".", "hal", "pump_control")
 )
 
 func writeSensors(e *physics.Engine) error {
@@ -20,14 +21,16 @@ func writeSensors(e *physics.Engine) error {
 	return os.WriteFile(sensorFile, []byte(content), 0644)
 }
 
-func readActuator() physics.PumpState {
+func readActuator() (physics.PumpState, error) {
 	data, err := os.ReadFile(actuatorFile)
 	if err != nil {
-		return physics.StateIdle
+		return physics.StateIdle, fmt.Errorf("reading actuator file: %w", err)
 	}
 	var state int
-	fmt.Sscanf(string(data), "%d", &state)
-	return physics.PumpState(state)
+	if _, err := fmt.Sscanf(string(data), "%d", &state); err != nil {
+		return physics.StateIdle, fmt.Errorf("parsing actuator value: %w", err)
+	}
+	return physics.PumpState(state), nil
 }
 
 func main() {
@@ -43,16 +46,20 @@ func main() {
 			return
 		}
 
-		// run one cycle of the compiled Baptisia control loop
 		cmd := exec.Command(controlBin)
 		cmd.Stderr = os.Stderr
-		cmd.Run()
+		if err := cmd.Run(); err != nil {
+			fmt.Printf("Error executing control loop binary: %v\n", err)
+			return
+		}
 
-		// read actuator decision and update physics engine
-		state := readActuator()
+		state, err := readActuator()
+		if err != nil {
+			fmt.Println("Error reading actuator:", err)
+			return
+		}
 		engine.Pump.SetState(state)
 
-		// print engine state — single source of truth
 		psi, flow, temp := engine.Pump.Readings()
 		fmt.Printf("[CYCLE %d] psi=%d flow=%d temp=%d state=%s\n",
 			engine.Cycles, psi, flow, temp, engine.Pump.Status())
