@@ -310,14 +310,28 @@ func (p *Parser) parseOutputCall() *ast.OutputCall {
 	return node
 }
 
+func (p *Parser) parseComparisonOperator() string {
+	op := p.current.Literal
+	switch p.current.Type {
+	case lexer.TOKEN_GTE, lexer.TOKEN_GT, lexer.TOKEN_LTE, lexer.TOKEN_LT, lexer.TOKEN_NEQ, lexer.TOKEN_EQ:
+		p.advance()
+		return op
+	default:
+		p.Errors = append(p.Errors,
+			fmt.Sprintf("line %d: expected comparison operator but got %s (%q)",
+				p.current.Line, p.current.Type, p.current.Literal))
+		p.advance()
+		return op
+	}
+}
+
 func (p *Parser) parseIf() ast.Node {
 	line := p.current.Line
 	p.expect(lexer.TOKEN_IF)
 
 	leftVar := p.current.Literal
 	p.advance()
-	leftOp := p.current.Literal
-	p.advance()
+	leftOp := p.parseComparisonOperator()
 	leftVal := p.current.Literal
 	p.advance()
 
@@ -326,8 +340,7 @@ func (p *Parser) parseIf() ast.Node {
 		p.advance()
 		rightVar := p.current.Literal
 		p.advance()
-		rightOp := p.current.Literal
-		p.advance()
+		rightOp := p.parseComparisonOperator()
 		rightVal := p.current.Literal
 		p.advance()
 
@@ -356,8 +369,7 @@ func (p *Parser) parseIf() ast.Node {
 		p.advance()
 		rightVar := p.current.Literal
 		p.advance()
-		rightOp := p.current.Literal
-		p.advance()
+		rightOp := p.parseComparisonOperator()
 		rightVal := p.current.Literal
 		p.advance()
 

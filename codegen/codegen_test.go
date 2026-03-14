@@ -20,7 +20,7 @@ func TestGenerate(t *testing.T) {
 				Name:     "motor",
 				Watchdog: "500ms",
 				Cycle:    "100ms",
-				Consts: &ast.ConstNode{Constants: []ast.ConstDecl{{Name: "max_speed", Value: "500"}, {Name: "max_temp", Value: "100"}}},
+				Consts:   &ast.ConstNode{Constants: []ast.ConstDecl{{Name: "max_speed", Value: "500"}, {Name: "max_temp", Value: "100"}}},
 				Vars: &ast.VarsNode{Vars: []ast.VarDecl{
 					{Volatile: true, TypeName: "BOOL", Name: "state", Value: "false"},
 					{Volatile: true, TypeName: "I32", Name: "speed", Value: "0"},
@@ -116,8 +116,8 @@ void motor_loop(void) {
 				Name:     "pump",
 				Watchdog: "500ms",
 				Cycle:    "100ms",
-				Consts: &ast.ConstNode{Constants: []ast.ConstDecl{{Name: "max_psi", Value: "100"}, {Name: "max_flow", Value: "500"}}},
-				States: &ast.StatesNode{Names: []string{"IDLE", "RUNNING", "FAULT", "MAINTENANCE"}},
+				Consts:   &ast.ConstNode{Constants: []ast.ConstDecl{{Name: "max_psi", Value: "100"}, {Name: "max_flow", Value: "500"}}},
+				States:   &ast.StatesNode{Names: []string{"IDLE", "RUNNING", "FAULT", "MAINTENANCE"}},
 				Vars: &ast.VarsNode{Vars: []ast.VarDecl{
 					{Volatile: true, TypeName: "I32", Name: "psi", Value: "0"},
 					{Volatile: true, TypeName: "I32", Name: "flow", Value: "0"},
@@ -126,7 +126,7 @@ void motor_loop(void) {
 					&ast.AssignStatement{Name: "state", Value: "IDLE"},
 					&ast.OutputCall{Relay: "motor_relay", State: "off"},
 				}},
-				Inputs: &ast.InputsNode{Inputs: []ast.SensorAssign{{Name: "psi", Pin: "A0", Min: "0", Max: "500"}, {Name: "flow", Pin: "A1", Min: "0", Max: "500"}}},
+				Inputs:  &ast.InputsNode{Inputs: []ast.SensorAssign{{Name: "psi", Pin: "A0", Min: "0", Max: "500"}, {Name: "flow", Pin: "A1", Min: "0", Max: "500"}}},
 				Outputs: &ast.OutputsNode{Outputs: []ast.ActuatorDecl{{Name: "motor_relay", Pin: "D0"}}},
 				Safety: &ast.SafetyNode{Statements: []ast.Node{
 					&ast.IfOrStatement{LeftVar: "psi", LeftOp: ">=", LeftVal: "max_psi", RightVar: "flow", RightOp: ">=", RightVal: "max_flow", Then: &ast.AssignStatement{Name: "state", Value: "FAULT"}},

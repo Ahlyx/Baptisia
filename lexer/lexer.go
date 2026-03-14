@@ -39,9 +39,17 @@ func (l *Lexer) NextToken() Token {
 		l.pos++
 		return Token{Type: TOKEN_COLON, Literal: ":", Line: l.line}
 	case '=':
+		if l.peek() == '=' {
+			l.pos += 2
+			return Token{Type: TOKEN_EQ, Literal: "==", Line: l.line}
+		}
 		l.pos++
 		return Token{Type: TOKEN_ASSIGN, Literal: "=", Line: l.line}
 	case '<':
+		if l.peek() == '=' {
+			l.pos += 2
+			return Token{Type: TOKEN_LTE, Literal: "<=", Line: l.line}
+		}
 		l.pos++
 		return Token{Type: TOKEN_LT, Literal: "<", Line: l.line}
 	case '>':
@@ -50,7 +58,14 @@ func (l *Lexer) NextToken() Token {
 			return Token{Type: TOKEN_GTE, Literal: ">=", Line: l.line}
 		}
 		l.pos++
-		return Token{Type: TOKEN_ILLEGAL, Literal: ">", Line: l.line}
+		return Token{Type: TOKEN_GT, Literal: ">", Line: l.line}
+	case '!':
+		if l.peek() == '=' {
+			l.pos += 2
+			return Token{Type: TOKEN_NEQ, Literal: "!=", Line: l.line}
+		}
+		l.pos++
+		return Token{Type: TOKEN_ILLEGAL, Literal: "!", Line: l.line}
 	case '-':
 		if l.isDigit(l.peek()) {
 			return l.readNumber()
