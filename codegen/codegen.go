@@ -49,7 +49,7 @@ func Generate(device *ast.DeviceNode, emitMain bool) string {
 	if device.Vars != nil {
 		out.WriteString("// Variable declarations\n")
 		for _, v := range device.Vars.Vars {
-			cType := typeMap[v.TypeName]
+			cType := typeMap[strings.ToUpper(v.TypeName)]
 			if v.Volatile {
 				fmt.Fprintf(&out, "volatile %s %s = %s;\n", cType, v.Name, v.Value)
 			} else {
